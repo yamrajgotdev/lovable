@@ -1,0 +1,2 @@
+import{j as e,L as s}from"./index-Ch9qCZ9T.js";function a(){return e.jsxs("main",{className:"mx-auto max-w-3xl px-6 py-12",children:[e.jsx("h1",{className:"text-3xl font-bold",children:"About RIDES4U"}),e.jsx("p",{className:"mt-4 text-sm text-muted-foreground",children:"RIDES4U connects passengers and drivers for safe, fast local rides across bike, auto and e-rickshaw categories."}),e.jsx(s,{to:"/",className:"mt-8 inline-block text-sm underline",children:"Back to home"})]})}export{a as component};
+//# sourceMappingURL=about-Cy0eZQ3y.js.map

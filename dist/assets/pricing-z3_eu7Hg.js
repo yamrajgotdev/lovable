@@ -1,0 +1,2 @@
+import{j as e,L as a}from"./index-Ch9qCZ9T.js";function t(){return e.jsxs("main",{className:"mx-auto max-w-3xl px-6 py-12",children:[e.jsx("h1",{className:"text-3xl font-bold",children:"Pricing"}),e.jsx("p",{className:"mt-4 text-sm text-muted-foreground",children:"Fares are based on base fare, distance, time, taxes and applicable promotions."}),e.jsx(a,{to:"/",className:"mt-8 inline-block text-sm underline",children:"Book a ride"})]})}export{t as component};
+//# sourceMappingURL=pricing-z3_eu7Hg.js.map

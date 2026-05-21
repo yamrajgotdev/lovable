@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>RIDES4U — Hail a ride in seconds</title>
+    <meta name="description" content="RIDES4U is a fast, monochrome ride-hailing experience for passengers and drivers." />
+    <link rel="canonical" href="https://rides4u.in/" />
+    <meta name="theme-color" content="#15151a" />
+    <meta property="og:title" content="RIDES4U" />
+    <meta property="og:description" content="Bike, auto and e-rickshaw rides on demand." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://rides4u.in/" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" />
+  </head>
+  <body>
+    <script>
+      (function() {
+        const saved = localStorage.getItem('rides4u_theme');
+        if (saved === 'light') {
+          document.documentElement.classList.add('light');
+        } else {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,2 @@
+import{j as e,L as s}from"./index-Ch9qCZ9T.js";function a(){return e.jsxs("main",{className:"mx-auto max-w-3xl px-6 py-12",children:[e.jsx("h1",{className:"text-3xl font-bold",children:"Privacy Policy"}),e.jsx("p",{className:"mt-4 text-sm text-muted-foreground",children:"RIDES4U uses your information to operate rides, payments, and support safely."}),e.jsx(s,{to:"/terms",className:"mt-8 inline-block text-sm underline",children:"Read terms"})]})}export{a as component};
+//# sourceMappingURL=privacy-Dsd4GgDc.js.map

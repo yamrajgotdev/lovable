@@ -1,0 +1,2 @@
+import{j as e,L as n}from"./index-Ch9qCZ9T.js";function r(){return e.jsxs("main",{className:"mx-auto max-w-3xl px-6 py-12",children:[e.jsx("h1",{className:"text-3xl font-bold",children:"Driver Signup"}),e.jsx("p",{className:"mt-4 text-sm text-muted-foreground",children:"Complete onboarding with your phone and vehicle documents."}),e.jsx(n,{to:"/auth/rider-signup",className:"mt-8 inline-block text-sm underline",children:"Start driver onboarding"})]})}export{r as component};
+//# sourceMappingURL=driver-signup-BI_Af_uD.js.map

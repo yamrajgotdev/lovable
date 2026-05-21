@@ -1,0 +1,2 @@
+import{j as t,L as e}from"./index-Ch9qCZ9T.js";function s(){return t.jsxs("main",{className:"mx-auto max-w-3xl px-6 py-12",children:[t.jsx("h1",{className:"text-3xl font-bold",children:"Contact"}),t.jsx("p",{className:"mt-4 text-sm text-muted-foreground",children:"Need help? Reach out via the in-app support flow."}),t.jsx(e,{to:"/support",className:"mt-8 inline-block text-sm underline",children:"Go to support"})]})}export{s as component};
+//# sourceMappingURL=contact-CWczLJ6v.js.map
