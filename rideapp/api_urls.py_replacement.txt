@@ -1,0 +1,98 @@
+    def post(self, request):
+        data = request.data
+        required_fields = ['name', 'phone', 'dl_number', 'pan_number', 'rc_number', 'plate', 'aadhaar', 'vehicle_type']
+        missing = [field for field in required_fields if not str(data.get(field, '')).strip()]
+        if missing:
+            return Response({
+                'success': False,
+                'message': f"Missing required fields: {', '.join(missing)}"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Allow signup if authenticated OR if we are in a registration flow where user might not be fully linked yet
+        user_instance = None
+        if request.user.is_authenticated:
+            if _phone_last_10(data.get('phone')) != _phone_last_10(request.user.phone_number):
+                return Response({
+                    'success': False,
+                    'message': 'Phone mismatch with authenticated account.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            user_instance = request.user
+        else:
+            # Fallback for registration flow: find user by phone if not authenticated
+            from authsystem.models import User
+            user_instance = User.objects.filter(phone_number__icontains=_phone_last_10(data.get('phone'))).first()
+            
+        # CRITICAL: Ensure we found a real database user and they are NOT Anonymous
+        if not user_instance or user_instance.is_anonymous:
+             return Response({
+                 'success': False, 
+                 'message': 'User session not found. Please verify OTP first.'
+             }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        vehicle_type = str(data.get('vehicle_type', '')).strip().lower()
+        allowed_vehicle_types = {value for value, _ in Driver.VEHICLE_TYPES}
+        if vehicle_type not in allowed_vehicle_types:
+            return Response({
+                'success': False,
+                'message': 'Invalid vehicle_type.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update the user record
+        user_instance.is_driver = True
+        user_instance.name = str(data.get('name', '')).strip()
+        user_instance.save(update_fields=['is_driver', 'name', 'updated_at'])
+
+        driver_defaults = {
+            'name': user_instance.name,
+            'vehicle_type': vehicle_type,
+            'vehicle_number': str(data.get('plate', '')).strip().upper(),
+            'license_number': str(data.get('dl_number', '')).strip(),
+            'aadhaar_number': str(data.get('aadhaar', '')).strip(),
+            'pan_number': str(data.get('pan_number', '')).strip().upper(),
+            'is_approved': False,
+            'approval_status': Driver.APPROVAL_PENDING,
+            'verification_notes': '',
+            'approved_at': None,
+            'rejected_at': None,
+        }
+
+        driver, created = Driver.objects.get_or_create(
+            user=user_instance,
+            defaults=driver_defaults,
+        )
+
+        if not created:
+            for field, value in driver_defaults.items():
+                setattr(driver, field, value)
+
+        # Document uploads from frontend onboarding form.
+        if 'dl_photo' in request.FILES:
+            driver.license_photo = request.FILES['dl_photo']
+        if 'rc_photo' in request.FILES:
+            driver.rc_photo = request.FILES['rc_photo']
+        if 'aadhaar_photo' in request.FILES:
+            driver.aadhaar_photo = request.FILES['aadhaar_photo']
+        if 'pan_photo' in request.FILES:
+            driver.pan_photo = request.FILES['pan_photo']
+
+        driver.save()
+
+        # Generate a real token for the user so they are logged in after signup
+        token, _ = AuthToken.objects.update_or_create(
+            user=user_instance,
+            defaults={
+                'key': secrets.token_hex(32),
+                'expires_at': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7),
+            },
+        )
+
+        return Response({
+            'success': True,
+            'token': token.key,
+            'user': {
+                **UserSerializer(user_instance).data,
+                'verification_status': 'pending',
+            },
+            'driver_id': driver.id,
+            'new_driver_profile': created,
+        })
