@@ -1,82 +1,81 @@
-"""
-Payment API Serializers
-"""
 from rest_framework import serializers
-from payments.models import Payment, DriverWallet, WalletTransaction, SupportTicket
+from .models import Driver, DriverLocation
 
 
-class PaymentSerializer(serializers.ModelSerializer):
-    """Full payment object serialization."""
-    ride_id = serializers.IntegerField(source='ride.id', read_only=True)
-    passenger_phone = serializers.CharField(source='passenger.phone_number', read_only=True)
+class DriverLocationSerializer(serializers.ModelSerializer):
+    """Serializer for driver location updates."""
+    class Meta:
+        model = DriverLocation
+        fields = ['latitude', 'longitude', 'heading', 'speed', 'accuracy', 'updated_at']
+        read_only_fields = ['updated_at']
+
+
+class DriverSerializer(serializers.ModelSerializer):
+    phone_number = serializers.CharField(source='user.phone_number', read_only=True)
+    
+    class Meta:
+        model = Driver
+        fields = [
+            'id', 'name', 'phone_number', 'vehicle_type', 'vehicle_number', 
+            'is_approved', 'is_online', 'rating', 'total_rides',
+            'current_lat', 'current_lng', 'profile_photo'
+        ]
+        read_only_fields = ['id', 'is_approved', 'rating', 'total_rides', 'phone_number']
+
+
+class DriverRegistrationSerializer(serializers.ModelSerializer):
+    phone_number = serializers.CharField(write_only=True)
+    name = serializers.CharField(max_length=100)
+    vehicle_type = serializers.ChoiceField(choices=Driver.VEHICLE_TYPES)
+    vehicle_number = serializers.CharField(max_length=20, required=False)
+    license_number = serializers.CharField(max_length=50, required=False)
+    aadhaar_number = serializers.CharField(max_length=14, required=False)
+    pan_number = serializers.CharField(max_length=10, required=False)
 
     class Meta:
-        model = Payment
-        fields = ['id', 'ride_id', 'amount', 'method', 'status', 'razorpay_order_id', 'razorpay_payment_id', 'created_at', 'updated_at', 'passenger_phone']
-        read_only_fields = ['id', 'razorpay_order_id', 'razorpay_payment_id', 'created_at', 'updated_at']
+        model = Driver
+        fields = [
+            'phone_number', 'name', 'vehicle_type', 'vehicle_number',
+            'license_number', 'aadhaar_number', 'pan_number'
+        ]
+
+    def create(self, validated_data):
+        from authsystem.models import User
+        
+        phone_number = validated_data.pop('phone_number')
+        user, _ = User.objects.get_or_create(
+            phone_number=phone_number,
+            defaults={'is_driver': True}
+        )
+        user.is_driver = True
+        user.save()
+
+        driver, created = Driver.objects.get_or_create(
+            user=user,
+            defaults=validated_data
+        )
+        
+        if not created:
+            for key, value in validated_data.items():
+                setattr(driver, key, value)
+            driver.save()
+        
+        return driver
 
 
-class PaymentOrderSerializer(serializers.Serializer):
-    """Response when creating a Razorpay order."""
-    order_id = serializers.CharField()
-    amount = serializers.DecimalField(max_digits=10, decimal_places=2)
-    status = serializers.CharField()
-    method = serializers.CharField()
-    payment_method = serializers.CharField()
-
-
-class CreateOrderSerializer(serializers.Serializer):
-    """Request to create a payment order."""
-    ride_id = serializers.IntegerField()
-    payment_method = serializers.ChoiceField(choices=['cash', 'razorpay_online'])
-
-
-class ConfirmCashSerializer(serializers.Serializer):
-    """Request to confirm cash payment collection."""
-    ride_id = serializers.IntegerField()
-
-
-class WalletTransactionSerializer(serializers.ModelSerializer):
-    """Wallet transaction serialization."""
-    ride_id = serializers.IntegerField(source='ride.id', allow_null=True, read_only=True)
-
-    class Meta:
-        model = WalletTransaction
-        fields = ['id', 'ride_id', 'amount', 'type', 'description', 'created_at']
-        read_only_fields = ['id', 'created_at']
-
-
-class WalletSerializer(serializers.ModelSerializer):
-    """Driver wallet serialization."""
-    recent_transactions = serializers.SerializerMethodField()
+class NearbyDriverSerializer(serializers.ModelSerializer):
+    distance_km = serializers.FloatField(read_only=True)
+    heading = serializers.SerializerMethodField()
 
     class Meta:
-        model = DriverWallet
-        fields = ['balance', 'total_earned', 'total_withdrawn', 'updated_at', 'recent_transactions']
-        read_only_fields = ['balance', 'total_earned', 'total_withdrawn', 'updated_at']
+        model = Driver
+        fields = [
+            'id', 'name', 'vehicle_type', 'vehicle_number',
+            'rating', 'current_lat', 'current_lng', 'distance_km', 'heading'
+        ]
 
-    def get_recent_transactions(self, obj):
-        """Get recent 10 transactions."""
-        transactions = WalletTransaction.objects.filter(
-            actor='driver',
-            actor_id=str(obj.driver.id),
-        ).order_by('-created_at')[:10]
-        return WalletTransactionSerializer(transactions, many=True).data
-
-
-class SupportTicketSerializer(serializers.ModelSerializer):
-    """Support ticket serialization."""
-    ride_id = serializers.IntegerField(source='ride.id', read_only=True)
-    driver_name = serializers.CharField(source='driver.name', read_only=True)
-
-    class Meta:
-        model = SupportTicket
-        fields = ['id', 'ride_id', 'driver_name', 'issue_type', 'description', 'status', 'resolution_notes', 'created_at', 'resolved_at']
-        read_only_fields = ['id', 'created_at', 'resolved_at']
-
-
-class CreateSupportTicketSerializer(serializers.Serializer):
-    """Request to create a support ticket."""
-    ride_id = serializers.IntegerField()
-    issue_type = serializers.ChoiceField(choices=['payment_not_received', 'passenger_refused_cash', 'payment_failed', 'other'])
-    description = serializers.CharField(max_length=1000)
+    def get_heading(self, obj):
+        location = getattr(obj, 'location', None)
+        if not location or location.heading is None:
+            return 0
+        return float(location.heading)
