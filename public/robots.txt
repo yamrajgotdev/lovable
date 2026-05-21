@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+Disallow: /api/
+Disallow: /ws/
+Disallow: /driver/
+Disallow: /passenger/
+Disallow: /rides/
+Disallow: /payments/
+Disallow: /profile/
+Disallow: /auth/
+
+Sitemap: https://rides4u.in/sitemap.xml
