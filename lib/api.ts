@@ -1051,8 +1051,6 @@ acceptRide: async (id: string) => {
       success: boolean;
       tickets: Array<{
         id: number;
-        user_type: string;
-        user_name: string;
         topic: string;
         topic_display: string;
         description: string;
@@ -1060,17 +1058,105 @@ acceptRide: async (id: string) => {
         status_display: string;
         priority: string;
         ride_id: number | null;
-        ride_info: {
-          id: number;
-          pickup: string;
-          drop: string;
-          date: string;
-        } | null;
-        admin_response: string | null;
         created_at: string;
-        updated_at: string;
       }>;
-    }>("/rides/support/tickets/"),
+    }>("/rides/support/my-tickets/"),
+
+  // ─── Ad System ─────────────────────────
+  getActiveAds: () =>
+    request<{
+      ads: Array<{
+        id: string;
+        title: string;
+        description: string;
+        imageUrl?: string;
+        actionUrl?: string;
+        actionText?: string;
+        backgroundColor?: string;
+        textColor?: string;
+      }>;
+    }>("/ads/active/").catch(() => ({ ads: [] })),
+
+  recordAdImpression: (adId: string) =>
+    request<{ success: boolean }>("/ads/impression/", { method: "POST", json: { ad_id: adId } }).catch(() => ({ success: false })),
+
+  recordAdClick: (adId: string) =>
+    request<{ success: boolean }>("/ads/click/", { method: "POST", json: { ad_id: adId } }).catch(() => ({ success: false })),
+
+  // ─── Rewards & Loyalty ──────────────────
+  getUserRewards: () =>
+    request<{
+      rewards: Array<{
+        id: string;
+        title: string;
+        description: string;
+        icon: string;
+        progress: number;
+        maxProgress: number;
+        isUnlocked: boolean;
+        shopLocation?: { lat: number; lng: number; name: string };
+        shopStatus?: "open" | "closed";
+        expiryDate?: string;
+      }>;
+    }>("/rewards/my-rewards/").catch(() => ({ rewards: [] })),
+
+  redeemReward: (rewardId: string) =>
+    request<{ success: boolean; message: string }>("/rewards/redeem/", {
+      method: "POST",
+      json: { reward_id: rewardId },
+    }).catch(() => ({ success: false, message: "Failed to redeem" })),
+
+  // ─── Emergency SOS ──────────────────────
+  sendSOSAlert: (data: {
+    ride_id?: string;
+    message: string;
+    contact_id?: string;
+    latitude?: number;
+    longitude?: number;
+  }) =>
+    request<{ success: boolean; message: string }>("/emergency/sos/", {
+      method: "POST",
+      json: data,
+    }).catch(() => ({ success: false, message: "Failed to send SOS" })),
+
+  getEmergencyContacts: () =>
+    request<{
+      contacts: Array<{
+        id: string;
+        name: string;
+        relationship: string;
+        phone: string;
+        isEmergency: boolean;
+      }>;
+    }>("/emergency/contacts/").catch(() => ({ contacts: [] })),
+
+  // ─── Coupon System ──────────────────────
+  getAvailableCoupons: () =>
+    request<{
+      coupons: Array<{
+        id: string;
+        code: string;
+        title: string;
+        description: string;
+        discount: number;
+        maxUses?: number;
+        usesRemaining?: number;
+        expiryDate: string;
+        isApplied?: boolean;
+        applicableOn?: string;
+      }>;
+    }>("/coupons/available/").catch(() => ({ coupons: [] })),
+
+  applyCoupon: (code: string) =>
+    request<{ success: boolean; discount: number; message: string }>("/coupons/apply/", {
+      method: "POST",
+      json: { code },
+    }).catch(() => ({ success: false, discount: 0, message: "Coupon not found" })),
+
+  removeCoupon: () =>
+    request<{ success: boolean }>("/coupons/remove/", { method: "POST", json: {} }).catch(() => ({
+      success: false,
+    })),
 };
 
 export type NearbyDriver = { id: string; lat: number; lng: number; vehicle: Vehicle; heading?: number };

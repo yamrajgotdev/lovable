@@ -335,7 +335,7 @@ export function RideChat({ rideId, role, rideStatus, autoOpen = false, onNewMess
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-600 transition-transform hover:scale-105 active:scale-95"
+        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-transform hover:scale-105 active:scale-95 ring-1 ring-border"
         aria-label="Open chat"
       >
         <svg
@@ -370,11 +370,11 @@ export function RideChat({ rideId, role, rideStatus, autoOpen = false, onNewMess
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
         className="fixed bottom-6 right-6 z-50 w-[calc(100vw-48px)] max-w-sm"
       >
-        <div className="overflow-hidden rounded-2xl bg-slate-900 border border-white/10 shadow-2xl">
+        <div className="overflow-hidden rounded-2xl bg-card border border-border shadow-2xl">
           {/* Header */}
-          <div className="flex items-center justify-between bg-slate-800 px-4 py-3">
+          <div className="flex items-center justify-between bg-surface px-4 py-3 border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -383,19 +383,19 @@ export function RideChat({ rideId, role, rideStatus, autoOpen = false, onNewMess
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
-                  className="text-emerald-400"
+                  className="text-primary"
                 >
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
               </div>
               <div>
-                <div className="text-sm font-semibold text-white">
+                <div className="text-sm font-semibold text-foreground">
                   {role === "passenger" ? "Driver" : "Passenger"}
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-gray-300">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <span
                     className={`h-1.5 w-1.5 rounded-full ${
-                      wsState === "open" ? "bg-emerald-400" : "bg-amber-400"
+                      wsState === "open" ? "bg-primary" : "bg-destructive"
                     }`}
                   />
                   {wsState === "open" ? "Online" : "Connecting..."}
@@ -404,7 +404,7 @@ export function RideChat({ rideId, role, rideStatus, autoOpen = false, onNewMess
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="grid h-8 w-8 place-items-center rounded-full text-gray-300 hover:bg-white/10 hover:text-white transition"
+              className="grid h-8 w-8 place-items-center rounded-full text-foreground hover:bg-surface-2 hover:text-accent transition"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -422,7 +422,7 @@ export function RideChat({ rideId, role, rideStatus, autoOpen = false, onNewMess
           </div>
 
           {/* Messages area */}
-          <div className="h-80 overflow-y-auto bg-slate-950 p-3 space-y-3">
+          <div className="h-80 overflow-y-auto bg-background p-3 space-y-3">
             {messages.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center text-center text-muted-foreground">
                 <div className="mb-2 text-4xl">💬</div>
@@ -457,21 +457,21 @@ export function RideChat({ rideId, role, rideStatus, autoOpen = false, onNewMess
                       <div
                         className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
                           isMine
-                            ? "bg-emerald-500/20 text-emerald-100 rounded-br-md"
+                            ? "bg-primary text-primary-foreground rounded-br-md"
                             : "bg-surface-2 text-foreground rounded-bl-md"
                         }`}
                       >
                         {msg.message_type === "QUICK" && (
-                          <span className="mr-1.5 text-xs text-emerald-400">⚡</span>
+                          <span className="mr-1.5 text-xs">⚡</span>
                         )}
                         {msg.message_text}
-                        <span className="ml-2 text-[10px] text-muted-foreground">
+                        <span className="ml-2 text-[10px] opacity-70">
                           {formatTime(msg.timestamp)}
                           {isMine && (
                             <span className="ml-1">
                               {msg.is_read ? (
                                 <svg
-                                  className="inline h-3 w-3 text-emerald-400"
+                                  className="inline h-3 w-3"
                                   viewBox="0 0 24 24"
                                   fill="none"
                                   stroke="currentColor"
@@ -481,7 +481,7 @@ export function RideChat({ rideId, role, rideStatus, autoOpen = false, onNewMess
                                 </svg>
                               ) : (
                                 <svg
-                                  className="inline h-3 w-3 text-muted-foreground"
+                                  className="inline h-3 w-3"
                                   viewBox="0 0 24 24"
                                   fill="none"
                                   stroke="currentColor"
@@ -509,13 +509,13 @@ export function RideChat({ rideId, role, rideStatus, autoOpen = false, onNewMess
 
           {/* Quick messages */}
           {canSend && !readOnly && (
-            <div className="border-t border-white/5 bg-surface-1 p-2">
+            <div className="border-t border-border bg-surface p-2">
               <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
                 {quickMessages.map((text) => (
                   <button
                     key={text}
                     onClick={() => handleQuickSend(text)}
-                    className="whitespace-nowrap rounded-full bg-surface-2 px-3 py-1 text-xs text-muted-foreground hover:bg-emerald-500/10 hover:text-emerald-400 transition"
+                    className="whitespace-nowrap rounded-full bg-surface-2 px-3 py-1 text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary transition"
                   >
                     {text}
                   </button>
@@ -525,9 +525,9 @@ export function RideChat({ rideId, role, rideStatus, autoOpen = false, onNewMess
           )}
 
           {/* Input area */}
-          <div className="border-t border-white/10 bg-surface-1 p-3">
+          <div className="border-t border-border bg-surface p-3">
             {readOnly ? (
-              <div className="rounded-lg bg-rose-500/10 px-3 py-2 text-center text-sm text-rose-400">
+              <div className="rounded-lg bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
                 Chat is read-only - Ride has ended
               </div>
             ) : canSend ? (
@@ -549,12 +549,12 @@ export function RideChat({ rideId, role, rideStatus, autoOpen = false, onNewMess
                   }}
                   placeholder="Type a message..."
                   maxLength={500}
-                  className="flex-1 rounded-xl bg-background px-3 py-2 text-sm outline-none ring-1 ring-white/10 focus:ring-emerald-500/50 transition"
+                  className="flex-1 rounded-xl bg-background px-3 py-2 text-sm outline-none ring-1 ring-border focus:ring-primary/50 transition"
                 />
                 <button
                   onClick={handleSend}
                   disabled={!inputText.trim()}
-                  className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -572,7 +572,7 @@ export function RideChat({ rideId, role, rideStatus, autoOpen = false, onNewMess
                 </button>
               </div>
             ) : (
-              <div className="rounded-lg bg-amber-500/10 px-3 py-2 text-center text-sm text-amber-400">
+              <div className="rounded-lg bg-muted/50 px-3 py-2 text-center text-sm text-muted-foreground">
                 Chat is currently unavailable for this ride
               </div>
             )}

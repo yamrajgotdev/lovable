@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { auth } from "@/lib/api";
+import { VideoOverviewModal } from "@/components/VideoOverviewModal";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -40,8 +41,9 @@ function Landing() {
   return (
     <div className="relative min-h-screen overflow-hidden">
       <div className="grid-bg pointer-events-none absolute inset-0 opacity-40" />
-      <header className="relative z-10 flex items-center px-6 py-5">
+      <header className="relative z-10 flex items-center justify-between px-6 py-5">
         <span className="font-display text-2xl font-bold tracking-tight">RIDES4U</span>
+        <VideoOverviewModal videoUrl="https://www.youtube.com/embed/dQw4w9WgXcQ" />
       </header>
 
       <main className="relative z-10 mx-auto flex max-w-md flex-col items-center px-6 pt-6 pb-16">
@@ -91,6 +93,11 @@ function Landing() {
               cta={lang === "en" ? "Ride with us" : "हमारे साथ चलें"}
               signInLabel={lang === "en" ? "Sign in" : "साइन इन"}
               signUpLabel={lang === "en" ? "Sign up" : "साइन अप"}
+              features={
+                lang === "en"
+                  ? ["Affordable fares", "24/7 support", "Multiple vehicle options", "Safe & secure rides", "Referral rewards"]
+                  : ["किफ़ायती किराए", "24/7 समर्थन", "कई वाहन विकल्प", "सुरक्षित सवारी", "रेफरल पुरस्कार"]
+              }
               onSignIn={() => navigate({ to: "/auth/login", search: { role: "passenger", mode: "signin" } })}
               onSignUp={() => navigate({ to: "/auth/login", search: { role: "passenger", mode: "signup" } })}
             />
@@ -100,10 +107,36 @@ function Landing() {
               cta={lang === "en" ? "Start earning with us" : "हमारे साथ कमाई शुरू करें"}
               signInLabel={lang === "en" ? "Sign in" : "साइन इन"}
               signUpLabel={lang === "en" ? "Sign up" : "साइन अप"}
+              features={
+                lang === "en"
+                  ? ["Flexible hours", "Quick payments", "Bonus opportunities", "Professional support", "Growing demand"]
+                  : ["लचीले घंटे", "तेजी से भुगतान", "बोनस अवसर", "पेशेवर समर्थन", "बढ़ती मांग"]
+              }
               dark
               onSignIn={() => navigate({ to: "/auth/login", search: { role: "rider", mode: "signin" } })}
               onSignUp={() => navigate({ to: "/auth/rider-signup" })}
             />
+          </div>
+        </section>
+
+        {/* Contact section */}
+        <section className="mt-10 pt-6 border-t border-border">
+          <p className="text-center text-xs text-muted-foreground mb-3">
+            {lang === "en" ? "Need help? Get in touch" : "मदद चाहिए? हमसे संपर्क करें"}
+          </p>
+          <div className="flex justify-center gap-3 flex-wrap">
+            <a
+              href="tel:+918273781021"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground transition-colors text-xs font-semibold"
+            >
+              <span>+91 8273 781 021</span>
+            </a>
+            <a
+              href="tel:+919368605557"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground transition-colors text-xs font-semibold"
+            >
+              <span>+91 9368 605 557</span>
+            </a>
           </div>
         </section>
       </main>
@@ -120,6 +153,7 @@ function RoleCard({
   signUpLabel,
   onSignIn,
   onSignUp,
+  features,
 }: {
   title: string;
   sub: string;
@@ -129,7 +163,10 @@ function RoleCard({
   signUpLabel: string;
   onSignIn: () => void;
   onSignUp: () => void;
+  features?: string[];
 }) {
+  const [showMore, setShowMore] = useState(false);
+
   return (
     <div
       className={`group relative overflow-hidden rounded-2xl p-5 transition ${
@@ -143,6 +180,31 @@ function RoleCard({
         <div className={`mt-3 text-[10px] uppercase tracking-[0.2em] ${dark ? "text-background/60" : "text-muted-foreground"}`}>
           {cta}
         </div>
+
+        {/* Expandable features section */}
+        {features && features.length > 0 && (
+          <div className="mt-4">
+            <button
+              onClick={() => setShowMore(!showMore)}
+              className={`text-xs font-semibold transition-colors ${
+                dark ? "text-background/80 hover:text-background" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {showMore ? "Show less" : "What we offer"}
+            </button>
+            {showMore && (
+              <ul className={`mt-2 space-y-1 text-xs ${dark ? "text-background/70" : "text-muted-foreground"}`}>
+                {features.map((feature, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className={`mt-0.5 ${dark ? "text-background/60" : "text-muted-foreground"}`}>•</span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
         <div className="mt-4 grid grid-cols-2 gap-2">
           <button
             onClick={onSignIn}
